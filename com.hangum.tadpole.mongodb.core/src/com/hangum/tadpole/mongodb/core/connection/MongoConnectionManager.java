@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -22,7 +23,6 @@ import com.hangum.tadpole.cipher.core.manager.CipherManager;
 import com.hangum.tadpole.engine.query.dao.system.UserDBDAO;
 import com.hangum.tadpole.mongodb.core.Messages;
 import com.mongodb.DB;
-import com.mongodb.DBAddress;
 import com.mongodb.Mongo;
 import com.mongodb.MongoOptions;
 import com.mongodb.ServerAddress;
@@ -68,12 +68,12 @@ public class MongoConnectionManager {
 					options.connectionsPerHost = 20;
 					options.threadsAllowedToBlockForConnectionMultiplier = 5;
 					options.maxWaitTime = 120000;
-					options.autoConnectRetry = false;
+//					options.autoConnectRetry = false;
 					options.safe = true;
 					
 					String strReplcaSet = userDB.getExt1();
 					if(strReplcaSet == null | "".equals(strReplcaSet)) {
-						mongoDB = new Mongo(new DBAddress(userDB.getUrl()), options);
+						mongoDB = new Mongo(userDB.getHost(), Integer.parseInt(userDB.getPort()));//new DBAddress(userDB.getUrl()), options);
 						
 					} else {
 						List<ServerAddress> listServerList = new ArrayList<ServerAddress>();
@@ -101,25 +101,34 @@ public class MongoConnectionManager {
 							passwdDecrypt = userDB.getPasswd();
 						}
 						
-						boolean auth = db.authenticate(userDB.getUsers(), passwdDecrypt.toCharArray());
-						if(!auth) {
-							throw new Exception(Messages.MongoDBConnection_3);
-						}
+//						boolean auth = db.authenticate(userDB.getUsers(), passwdDecrypt.toCharArray());
+//						if(!auth) {
+//							throw new Exception(Messages.MongoDBConnection_3);
+//						}
 					}	
 
 //					
 //					어드민 권한이 있어야 가능한 부분이므로 주석 처리합니다.
 //					
-//					// db 종류를 가져옵니다.
-//					List<String> listDB = mongoDB.getDatabaseNames();
-//					boolean isDB = false;
-//					for (String dbName : listDB) if(userDB.getDb().equals(dbName)) isDB = true;						
-//					if(!isDB) {
-//						throw new MongoDBNotFoundException(userDB.getDb() + Messages.MongoDBConnection_0);
-//					}
+					// db 종류를 가져옵니다.
+					List<String> listDB = mongoDB.getDatabaseNames();
+					boolean isDB = false;
+					for (String dbName : listDB) {
+//						System.out.println("=========> [" + dbName + "]");
+						if(userDB.getDb().equals(dbName)) isDB = true;						
+					}
+					if(!isDB) {
+						throw new MongoDBNotFoundException(userDB.getDb() + Messages.MongoDBConnection_0);
+					}
 					try {
 						//디비가 정상 생성 되어 있는지 권한이 올바른지 검사하기 위해 날려봅니다.
-						db.getCollectionNames();
+						Set<String> setCollectName = db.getCollectionNames();
+//						for (String string : setCollectName) {
+//							logger.debug("collection name is " + string);
+//						}
+						
+//						db = mongoDB.getDB("moncast");
+//						System.out.println("\t" + db.getCollection("apps").getCount());
 					} catch(Exception e) {
 						logger.error("error", e);
 						throw new MongoDBNotFoundException(userDB.getDb() + " " + e.getMessage());//Messages.MongoDBConnection_0);

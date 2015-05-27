@@ -27,7 +27,7 @@ import com.hangum.tadpole.engine.query.dao.system.UserDBDAO;
 public interface ITableDecorationExtension {
 
 	/** table Column list */
-	Map<String, List<String>> mapColumnDescList = new HashMap<>();
+	public Map<String, List<String>> mapColumnDescList = new HashMap<>();
 	
 	/**
 	 * 익스텐션을 초기화하고 동작가능한지 초기화 합니다.

@@ -299,7 +299,7 @@ public class MapReduceEditor extends EditorPart {
 		if(!"".equals(strFinilize)) mrCmd.setFinalize(strFinilize);
 		if(dbSort != null) mrCmd.setSort(dbSort);		
 		if(getLimit() > 0) mrCmd.setLimit(getLimit());
-		if(btnJsMode.getSelection()) mrCmd.addExtraOption("jsMode", true);
+//		if(btnJsMode.getSelection()) mrCmd.addExtraOption("jsMode", true);
 		
 		final BasicDBObject searchObj = (BasicDBObject)mrCmd.toDBObject();   
 		if(btnSharded.getSelection()) 	((BasicDBObject)searchObj.get("out")).put("sharded", true);

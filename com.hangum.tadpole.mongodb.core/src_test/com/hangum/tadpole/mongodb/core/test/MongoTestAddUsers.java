@@ -30,8 +30,8 @@ public class MongoTestAddUsers  {
 		Mongo mongo = testMongoCls.connection(ConAndAuthentication.serverurl, ConAndAuthentication.port);
 		DB db = mongo.getDB("test");
 		
-		boolean bool = db.authenticate("admin", "admin".toCharArray());
-		System.out.println(bool);
+//		boolean bool = db.authenticate("admin", "admin".toCharArray());
+//		System.out.println(bool);
 		
 //		WriteResult wr = db.addUser("admin", "admin".toCharArray());
 //		System.out.println("[add user]" +  wr.getError() );

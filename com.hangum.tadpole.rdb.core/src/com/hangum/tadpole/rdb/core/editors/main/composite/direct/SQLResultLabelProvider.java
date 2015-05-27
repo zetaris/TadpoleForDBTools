@@ -187,7 +187,7 @@ public class SQLResultLabelProvider extends LabelProvider implements ITableLabel
 			NumberFormat nf = NumberFormat.getNumberInstance();
 			return nf.format(Double.parseDouble(value.toString()));
 		} catch(Exception e){
-			logger.error("number format exception", e);
+			logger.error("number format exception. value is " + value);
 			// ignore exception
 		}
 

@@ -4,6 +4,7 @@ import java.io.StringWriter;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +40,54 @@ import com.ibatis.sqlmap.client.SqlMapClient;
 public class QueryUtils {
 	private static final Logger logger = Logger.getLogger(QueryUtils.class);
 	public static enum RESULT_TYPE {JSON, CSV, XML};
+	
+	/**
+	 * execute drop table
+	 * 
+	 * @param userDB
+	 * @param strQuery
+	 * @throws Exception
+	 */
+	public static void executeDroptable(final UserDBDAO userDB, final String strQuery) throws Exception {
+		SqlMapClient client = TadpoleSQLManager.getInstance(userDB);
+		java.sql.Connection javaConn = null;
+		Statement statement = null;
+		
+		try {
+			javaConn = client.getDataSource().getConnection();
+			statement = javaConn.createStatement();
+			
+			int count = 0;
+//			for (String strQuery : listQuery) {
+				// 쿼리 중간에 commit이나 rollback이 있으면 어떻게 해야 하나???
+//				if(!TransactionManger.transactionQuery(reqQuery.getSql(), userEmail, userDB)) {
+//					
+//					if(StringUtils.startsWithIgnoreCase(strQuery.trim(), "CREATE TABLE")) { //$NON-NLS-1$
+//						strQuery = StringUtils.replaceOnce(strQuery, "(", " ("); //$NON-NLS-1$ //$NON-NLS-2$
+//					}
+					
+//				}
+				statement.addBatch(strQuery);
+				
+//				if (++count % intCommitCount == 0) {
+//					statement.executeBatch();
+//					count = 0;
+//				}
+//		''	}
+			statement.executeBatch();
+		} catch(Exception e) {
+//			javaConn.rollback();
+			logger.error("Execute batch update", e); //$NON-NLS-1$
+			throw e;
+		} finally {
+			try { statement.close();} catch(Exception e) {}
+
+//			if(reqQuery.isAutoCommit()) {
+				try { javaConn.close(); } catch(Exception e){}
+//			}
+		}
+		
+	}
 	
 	/**
 	 * query to csv

@@ -69,7 +69,7 @@ public class MongoDBQuery {
 		options.connectionsPerHost = 20;		
 		Mongo mongo = new Mongo(userDB.getHost(), Integer.parseInt(userDB.getPort()));
 		DB db = mongo.getDB(userDB.getDb());
-		db.authenticate(userDB.getUsers(), userDB.getPasswd().toCharArray());
+//		db.authenticate(userDB.getUsers(), userDB.getPasswd().toCharArray());
 		
 		// 
 		// 신규는 다음과 같은 작업을 해주지 않으면 디비가 생성되지 않습니다.
@@ -192,6 +192,7 @@ public class MongoDBQuery {
 									
 		return MongoDBTableColumn.tableColumnInfo(coll.getIndexInfo(), coll.findOne());
 	}
+	
 	
 	/**
 	 * collection drop
@@ -372,7 +373,7 @@ public class MongoDBQuery {
 		if(logger.isDebugEnabled()) {
 			try {
 				logger.debug( "[writer document]" + wr!=null?wr.toString():"" );
-				logger.debug( "[wr error]" + wr!=null?wr.getError():"" );		
+				logger.debug( "[wr error]" + wr!=null?wr.toString():"" );		
 				logger.debug("[n]" + wr!=null?wr.getN():"" );
 			} catch(Exception e) {
 				logger.error("insert document", e);
@@ -394,13 +395,13 @@ public class MongoDBQuery {
 		
 		if(logger.isDebugEnabled()) {
 			logger.debug( "[writer document]" + wr.toString() );
-			logger.debug( wr.getError() );		
+			logger.debug( wr.toString() );		
 			logger.debug("[n]" + wr.getN() );
 		}
 		
 		// 외부 참조키가 있어 삭제 되지 않는 경우
-		if(wr.getN() == 0 && !"".equals(wr.getError())) {
-			throw new Exception(wr.getError());
+		if(wr.getN() == 0 && !"".equals(wr.toString())) {
+			throw new Exception(wr.toString());
 		}
 	}
 	
@@ -439,7 +440,7 @@ public class MongoDBQuery {
 		DBObject dbObject = (DBObject) JSON.parse(jsonStr);
 		
 		DBCollection collection = findCollection(userDB, colName);
-		collection.ensureIndex(dbObject, strIndexName, unique);
+//		collection.ensureIndex(dbObject, strIndexName, unique);
 	}
 	
 	/**

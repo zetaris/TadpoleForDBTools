@@ -18,13 +18,12 @@ import com.hangum.tadpole.engine.query.dao.mongodb.CollectionFieldDAO;
 import com.hangum.tadpole.mongodb.core.utils.MongoDBTableColumn;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
 public class ConAndAuthentication {
-	public static String serverurl = "localhost";
+	public static String serverurl = "52.68.200.152";
 	public static int port = 27017;
 
 	/**
@@ -37,12 +36,11 @@ public class ConAndAuthentication {
 
 		Mongo mongo = testMongoCls.connection(serverurl, port);
 		if (mongo != null) {
-			DB testDB = mongo.getDB("test");
-			// Set<String> collectionNames =
-			// testMongoCls.getCollectionNames(testDB);
-			// for (String collection : collectionNames) {
-			testMongoCls.getCollectionInfo(testDB, "store");
-			// }
+			DB testDB = mongo.getDB("moncast");
+			 Set<String> collectionNames = testMongoCls.getCollectionNames(testDB);
+			 for (String colName : collectionNames) {
+				 testMongoCls.getCollectionInfo(testDB, colName);
+			 }
 		}
 		mongo.close();
 	}
@@ -64,8 +62,8 @@ public class ConAndAuthentication {
 			// authentication(optional)
 			// boolean auth = db.authenticate(myUserName, myPassword);
 
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
+//		} catch (UnknownHostException e) {
+//			e.printStackTrace();
 		} catch (MongoException e) {
 			e.printStackTrace();
 		}

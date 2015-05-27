@@ -31,7 +31,7 @@ public class MongoDBQueryUtil {
 	 */
 	private static final Logger logger = Logger.getLogger(MongoDBQueryUtil.class);
 	
-	private int DATA_COUNT = 1000;
+	private int DATA_COUNT = 5000;
 	
 	private UserDBDAO userDB;
 	private String requestQuery;

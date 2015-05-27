@@ -21,6 +21,7 @@ import java.util.List;
  */
 public class CollectionFieldDAO {
 	String Field = "";
+	String searchName = "";
 	String Type= "";
 	String Key= "";
 	
@@ -33,6 +34,26 @@ public class CollectionFieldDAO {
 		this.Type = type;
 		this.Key = key;
 	}
+	
+	
+
+	/**
+	 * @return the searchName
+	 */
+	public String getSearchName() {
+		return searchName;
+	}
+
+
+
+	/**
+	 * @param searchName the searchName to set
+	 */
+	public void setSearchName(String searchName) {
+		this.searchName = searchName;
+	}
+
+
 
 	public String getField() {
 		return Field;

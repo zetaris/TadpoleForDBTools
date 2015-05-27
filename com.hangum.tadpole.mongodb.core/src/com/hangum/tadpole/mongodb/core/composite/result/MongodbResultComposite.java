@@ -636,10 +636,10 @@ public class MongodbResultComposite extends Composite {
 			
 			DBObject explainDBObject = dbCursor.explain();
 			sbConsoleExecuteMsg.append(JSONUtil.getPretty(explainDBObject.toString())).append("\r\n"); //$NON-NLS-1$ //$NON-NLS-2$
-			sbConsoleErrorMsg.append(JSONUtil.getPretty(mongoDB.getLastError().toString())).append("\r\n"); //$NON-NLS-1$ //$NON-NLS-2$
+//			sbConsoleErrorMsg.append(JSONUtil.getPretty(mongoDB.getLastError().toString())).append("\r\n"); //$NON-NLS-1$ //$NON-NLS-2$
 	
-			mongoDB.forceError();
-	        mongoDB.resetError();
+//			mongoDB.forceError();
+//	        mongoDB.resetError();
 	        
 //	        if(logger.isDebugEnabled()) logger.debug(sbConsoleMsg);
 			

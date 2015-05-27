@@ -95,6 +95,9 @@ public class Messages extends NLS {
 	public static String CsvToRDBImportDialog_btnRadioButton_text;
 	public static String CsvToRDBImportDialog_label_text;
 	public static String MongoDBImportEditor_lblNewLabel_text;
+	public static String MongoDBImportEditor_lblNewLabel_1_text;
+	public static String MongoDBImportEditor_btnTableCreateion_text;
+	public static String MongoDBImportEditor_btnCrateionInsertStatement_text;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

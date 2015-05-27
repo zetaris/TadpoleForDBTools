@@ -74,9 +74,13 @@ public class MongoDBImportEditor extends EditorPart {
 	private TadpoleEditorWidget textQuery;
 	private Text textCollectionName;
 	
-	private Combo comboDBList;
+	private Combo comboDBSourceList;
+	private Combo comboDBTargetList;
 	private TableColumnLIstComposite tableColumnListComposite;
 	private Button btnExistOnDelete;
+	
+	private Button btnTableCreateion;
+	private Button btnCrateionInsertStatement;
 
 	public MongoDBImportEditor() {
 		super();
@@ -132,23 +136,43 @@ public class MongoDBImportEditor extends EditorPart {
 		lblSource.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblSource.setText(Messages.MongoDBImportEditor_0);
 		
-		comboDBList = new Combo(compositeHead, SWT.READ_ONLY);
-		comboDBList.addSelectionListener(new SelectionAdapter() {
+		comboDBSourceList = new Combo(compositeHead, SWT.READ_ONLY);
+		comboDBSourceList.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				initCombo();
 				isSelectAll = false;
 			}
 		});
-		comboDBList.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		comboDBSourceList.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
 		Label lblTarget = new Label(compositeHead, SWT.NONE);
 		lblTarget.setText(Messages.MongoDBImportEditor_2);
 		
-		Label lblTargetDB = new Label(compositeHead, SWT.BORDER);
-		lblTargetDB.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		lblTargetDB.setText(targetDBDAO.getDisplay_name());
+//		Label lblTargetDB = new Label(compositeHead, SWT.BORDER);
+//		lblTargetDB.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+//		lblTargetDB.setText(targetDBDAO.getDisplay_name());
+		comboDBTargetList = new Combo(compositeHead, SWT.READ_ONLY);
+		comboDBTargetList.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				initCombo();
+				isSelectAll = false;
+			}
+		});
+		comboDBTargetList.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		new Label(compositeHead, SWT.NONE);
+		new Label(compositeHead, SWT.NONE);
+		
+		btnTableCreateion = new Button(compositeHead, SWT.CHECK);
+		btnTableCreateion.setSelection(true);
+		btnTableCreateion.setText(Messages.MongoDBImportEditor_btnTableCreateion_text);
+		new Label(compositeHead, SWT.NONE);
+		new Label(compositeHead, SWT.NONE);
+		
+		btnCrateionInsertStatement = new Button(compositeHead, SWT.CHECK);
+		btnCrateionInsertStatement.setSelection(true);
+		btnCrateionInsertStatement.setText(Messages.MongoDBImportEditor_btnCrateionInsertStatement_text);
 		
 		Composite compositeBody = new Composite(parent, SWT.NONE);
 		GridLayout gl_compositeBody = new GridLayout(1, false);
@@ -238,7 +262,7 @@ public class MongoDBImportEditor extends EditorPart {
 	}
 	
 	private void initCombo() {
-		tableColumnListComposite.init( (UserDBDAO)comboDBList.getData(comboDBList.getText()) );
+		tableColumnListComposite.init( (UserDBDAO)comboDBSourceList.getData(comboDBSourceList.getText()) );
 		tableColumnListComposite.layout();
 	}
 	
@@ -246,22 +270,29 @@ public class MongoDBImportEditor extends EditorPart {
 	 * 화면을 초기화 합니다.
 	 */
 	private void initEditor() {
-		tabFolderQuery.setSelection(1);
+		tabFolderQuery.setSelection(0);
 		
 		try {
-			int visibleItemCount = 0;
+//			int visibleItemCount = 0;
 			List<UserDBDAO> userDBS = TadpoleSystem_UserDBQuery.getUserDB();
 			for (UserDBDAO userDBDAO : userDBS) {
 				// 임포트 하려는 자신은 제외 
-				if(targetDBDAO.getSeq() != userDBDAO.getSeq()) {
-					comboDBList.add(userDBDAO.getDisplay_name());
-					comboDBList.setData(userDBDAO.getDisplay_name(), userDBDAO);
-					visibleItemCount++;
-				}
+//				if(targetDBDAO.getSeq() != userDBDAO.getSeq()) {
+					comboDBSourceList.add(userDBDAO.getDisplay_name());
+					comboDBSourceList.setData(userDBDAO.getDisplay_name(), userDBDAO);
+//					visibleItemCount++;
+//				}
 			}
-			comboDBList.setVisibleItemCount(visibleItemCount);
-			comboDBList.select(0);
+			comboDBSourceList.setVisibleItemCount(userDBS.size());
+			comboDBSourceList.select(0);
 			initCombo();
+			
+			for (UserDBDAO userDBDAO : userDBS) {
+				comboDBTargetList.add(userDBDAO.getDisplay_name());
+				comboDBTargetList.setData(userDBDAO.getDisplay_name(), userDBDAO);
+			}
+			comboDBTargetList.setVisibleItemCount(userDBS.size());
+			comboDBTargetList.select(0);
 			
 		} catch (Exception e) {
 			logger.error(Messages.MongoDBImportEditor_8, e);
@@ -291,14 +322,17 @@ public class MongoDBImportEditor extends EditorPart {
 		}
 		
 		// job make
-		final UserDBDAO sourceDBDAO = (UserDBDAO)comboDBList.getData(comboDBList.getText());
+		final UserDBDAO sourceDBDAO = (UserDBDAO)comboDBSourceList.getData(comboDBSourceList.getText());
+		final UserDBDAO targetDBDAO = (UserDBDAO)comboDBTargetList.getData(comboDBTargetList.getText());
+		
 		Job job = null;		
 		if(MessageDialog.openConfirm(null, "Confirm", Messages.MongoDBImportEditor_1)) {	 //$NON-NLS-1$
 			if(tabFolderQuery.getSelectionIndex() == 0) {
 				
 				DBImport dbImport = null;
 				if(targetDBDAO != null && DBDefine.MONGODB_DEFAULT == sourceDBDAO.getDBDefine()) {
-					dbImport = new MongoDBCollectionToMongodBImport(sourceDBDAO, targetDBDAO, tableColumnListComposite.getSelectListTables());
+					dbImport = new MongoDBCollectionToMongodBImport(sourceDBDAO, targetDBDAO, tableColumnListComposite.getSelectListTables(), btnTableCreateion.getSelection(), btnCrateionInsertStatement.getSelection());
+					
 				} else {
 					dbImport = new RDBTableToMongoDBImport(sourceDBDAO, targetDBDAO, tableColumnListComposite.getSelectListTables());
 				}
