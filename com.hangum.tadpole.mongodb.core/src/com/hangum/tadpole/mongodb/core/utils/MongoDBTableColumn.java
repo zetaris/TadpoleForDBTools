@@ -19,6 +19,7 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.bson.types.BasicBSONList;
+import org.bson.types.ObjectId;
 
 import com.hangum.tadpole.engine.query.dao.mongodb.CollectionFieldDAO;
 import com.mongodb.BasicDBObject;
@@ -180,7 +181,7 @@ public class MongoDBTableColumn {
 						Object objArryValue = basicList.get(0);
 						logger.debug("\t == > " + objArryValue);
 						
-						if(objArryValue instanceof String) {
+						if(objArryValue instanceof String | objArryValue instanceof ObjectId) {
 							logger.debug("\t instance type is String");
 							CollectionFieldDAO columnArry = new CollectionFieldDAO(strName, 
 									objArryValue.toString() != null?"BasicBSONList":"BasicBSONList",  //$NON-NLS-1$
@@ -190,6 +191,7 @@ public class MongoDBTableColumn {
 							listListCollection.add(columnArry);
 						} else {
 							logger.debug("\t instance type is not String");
+							
 							BasicDBObject basicObject = (BasicDBObject)objArryValue;
 							
 							for (String strKey : basicObject.keySet()) {

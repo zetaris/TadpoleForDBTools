@@ -21,6 +21,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.bson.types.BasicBSONList;
+import org.bson.types.ObjectId;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -371,7 +372,7 @@ public class MongoDBCollectionToMongodBImport extends DBImport {
 										for (Object objArryValue : basicList) {
 											sbBufferValue.setLength(0);
 											
-											if(objArryValue instanceof String) {
+											if(objArryValue instanceof String | objArryValue instanceof ObjectId) {
 												sbBufferValue.append(objArryValue == null?"''":"'" + objArryValue.toString() + "', ");
 												// _id 키값을 입력합니다.
 												sbBufferValue.append("'" + dbObject.get("_id").toString() + "', ");
