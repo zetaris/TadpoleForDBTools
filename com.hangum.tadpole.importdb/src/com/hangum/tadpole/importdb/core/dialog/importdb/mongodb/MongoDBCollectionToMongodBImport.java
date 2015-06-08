@@ -348,13 +348,15 @@ public class MongoDBCollectionToMongodBImport extends DBImport {
 									}
 								} else if("BasicBSONList".equals(strCollectFieldType)) {
 									logger.debug("========> basicBsonlist \t" + collectionFieldDAO.getSearchName() + ":" + collectionFieldDAO.getField());
+									
+									String strRealKey = StringUtils.remove(strKey, strNewColName+"_");
 
 									/*
 									 * list 형태의 데이터의 list데이터 하나가 하나의 insert문이 되도록 작업 되었습니다.
 									 * 하여서 데이터를 돌면서 insert into문을 생성해 주면됩니다.
 									 */
 									isBasicBSONList = true;
-									BasicBSONList basicList = (BasicBSONList)dbObject.get(strKey);
+									BasicBSONList basicList = (BasicBSONList)dbObject.get(strRealKey);
 									if(!basicList.isEmpty()) {
 										sbBufferColumn.setLength(0);
 										sbBufferValue.setLength(0);
@@ -378,10 +380,13 @@ public class MongoDBCollectionToMongodBImport extends DBImport {
 												BasicDBObject basicObject = (BasicDBObject)objArryValue;
 												
 												for (CollectionFieldDAO innerCollectionField : listCollectionInfo) {
-													String strInnerValue = (String)basicObject.get(innerCollectionField.getSearchName());
-													sbBufferValue.append(strInnerValue == null?"''":"'" + strInnerValue + "', ");
+													if("_id".equals(innerCollectionField.getSearchName())) {
+														sbBufferValue.append("'" + dbObject.get("_id").toString() + "', ");		
+													} else {
+														String strInnerValue = basicObject.get(innerCollectionField.getSearchName()) == null?"":basicObject.get(innerCollectionField.getSearchName()).toString();
+														sbBufferValue.append(strInnerValue == null?"''":"'" + strInnerValue + "', ");	
+													}
 												}
-												
 											}
 											
 											String strCValue = StringUtils.removeEnd(sbBufferValue.toString(), ", ");
