@@ -11,15 +11,16 @@
 package com.hangum.tadpole.importdb.core.dialog.importdb.mongodb;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.bson.types.BasicBSONList;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -37,6 +38,7 @@ import com.hangum.tadpole.importdb.core.dialog.importdb.dao.ModTableDAO;
 import com.hangum.tadpole.importdb.core.dialog.importdb.utils.MongoDBQueryUtil;
 import com.hangum.tadpole.mongodb.core.query.MongoDBQuery;
 import com.hangum.tadpole.mongodb.core.utils.MongoDBTableColumn;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
 /**
@@ -131,6 +133,18 @@ public class MongoDBCollectionToMongodBImport extends DBImport {
 			public IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask("Start import....", IProgressMonitor.UNKNOWN);
 				
+				final String strTargetDir = /* "/Users/hangum/Downloads/mon/"*/ System.getProperty("user.home") + "/mon/" + getSourceUserDB().getDisplay_name() + "/";
+				
+				// 기존에 데이터가 있다면 삭제합니다.
+				try {
+					FileUtils.deleteDirectory(new File(strTargetDir));
+				} catch (IOException e1) {
+					logger.debug("delete directory");
+				}
+				
+				// 없다면 새롭게 만듭니다. 
+				new File(strTargetDir).mkdirs();
+				
 				try {
 					for (ModTableDAO modTableDAO : listModeTable) {
 
@@ -144,7 +158,7 @@ public class MongoDBCollectionToMongodBImport extends DBImport {
 						}
 						
 						// insert
-						insertMongoDB(modTableDAO, strNewColName);
+						insertMongoDB(strTargetDir, modTableDAO, strNewColName);
 					}			
 
 				} catch(Exception e) {
@@ -171,174 +185,226 @@ public class MongoDBCollectionToMongodBImport extends DBImport {
 	public static final String CREATE_STATEMNT = "CREATE TABLE %s(%s); " + PublicTadpoleDefine.LINE_SEPARATOR;
 	public static final String INSERT_INTO = "INSERT INTO %s (%s) VALUES (%s);" + PublicTadpoleDefine.LINE_SEPARATOR;
 			
-	private void insertMongoDB(ModTableDAO modTableDAO, String strNewColName) throws Exception {
-		String strUserHome = System.getProperty("user.home");
-		String strDir = /* "/Users/hangum/Downloads/mon/"*/ strUserHome + "/mon/" + getSourceUserDB().getDisplay_name() + "/";
-		new File(strDir).mkdirs();
-		String strFileName =  strDir + strNewColName + ".sql";
-		logger.debug("file location is " + strFileName);
-		new File(strFileName).delete();
+	private void insertMongoDB(String strTargetDir, ModTableDAO modTableDAO, String strNewColName) throws Exception {
 		
 		String workTable = modTableDAO.getName();		
 		if(logger.isDebugEnabled()) logger.debug("[work collection]" + workTable);
 		
 		logger.debug(getSourceUserDB().getDBDefine() + ", target is " + getTargetUserDB().getDBDefine());
 		if(getSourceUserDB().getDBDefine() == DBDefine.MONGODB_DEFAULT && getTargetUserDB().getDBDefine() != DBDefine.MONGODB_DEFAULT) {
-			logger.debug("=========> source db is mongo, target db is does not mongo");
+			if(logger.isDebugEnabled()) logger.debug("=========> source db is mongo, target db is does not mongo");
 			long longStart = System.currentTimeMillis();
 			// create 문을 만들기위해  컬럼 구조를 넣습니다. 
-			Map<String, CollectionFieldDAO> mapColumn = new HashMap<String, CollectionFieldDAO>();
+			Map<String, Map<String, CollectionFieldDAO>> mapTableColumn = new HashMap<String, Map<String, CollectionFieldDAO>>();
 			
 			if(isCreateTable) {
 				// 전체 스크립트를 뽑아야 한다.
 				// create 문을 뽑기 위해 필드 명을 찾아서 한 행으로 만들어 준다.
 				MongoDBQueryUtil qu = new MongoDBQueryUtil(getSourceUserDB(), workTable);
-				logger.debug("---start object-----");
+				if(logger.isDebugEnabled()) logger.debug("---start object-----");
 				while(qu.hasNext()) {
 					qu.nextQuery();
 					
 					// row 단위
 					List<DBObject> listDBObject = qu.getCollectionDataList();
-					logger.debug("\t[start]generate create statement : " + listDBObject.size());
+					if(logger.isDebugEnabled()) logger.debug("\t[start]generate create statement : " + listDBObject.size());
 					for (DBObject dbObject : listDBObject) {
-//						long subS = System.currentTimeMillis();
-						List<CollectionFieldDAO> listCollectionInfo = MongoDBTableColumn.tableColumnInfoFlat(dbObject);
-//						logger.debug("=>1. " + (System.currentTimeMillis() - subS));
-//						
-//						subS = System.currentTimeMillis();
-//						logger.debug("\t\t field count : " + listCollectionInfo.size());
-						for (CollectionFieldDAO collectionFieldDAO : listCollectionInfo) {
-							if(!mapColumn.containsKey(collectionFieldDAO.getField())) {
-								mapColumn.put(collectionFieldDAO.getField(), collectionFieldDAO);
+						Map<String, List<CollectionFieldDAO>> mapCollectionInfo = MongoDBTableColumn.tableColumnInfoFlat(strNewColName, dbObject);
+						for (String strKey : mapCollectionInfo.keySet()) {
+							Map<String, CollectionFieldDAO> tmpTableColumn = mapTableColumn.get(strKey);
+							// collection 이 없으면...
+							if(tmpTableColumn == null) {
+								tmpTableColumn = new HashMap<String,CollectionFieldDAO>();
+								mapTableColumn.put(strKey, tmpTableColumn);
 							}
+							
+							for (CollectionFieldDAO collectionFieldDAO : mapCollectionInfo.get(strKey)) {
+								if(!tmpTableColumn.containsKey(collectionFieldDAO.getField())) {
+									tmpTableColumn.put(collectionFieldDAO.getField(), collectionFieldDAO);
+								}
+							}	
 						}
-//						logger.debug("=>2. " + (System.currentTimeMillis() - subS));
+						
 					}
-					logger.debug("\t[end]generate create statement : " );
-	//				MongoDBQuery.insertDocument(getTargetUserDB(), strNewColName, listDBObject);
+					if(logger.isDebugEnabled()) logger.debug("\t[end]generate create statement : " );
 				}
 				
-				String strErrorTxt = "";
-				// 실제 모든 컬럼 정보이다.
-				String strColumn = "";
-				Set<String> keySet = mapColumn.keySet();
-				for (String string : keySet) {
-					CollectionFieldDAO collectField = mapColumn.get(string);
-	//				System.out.println("====>" + collectField.getField() + "\t" + collectField.getType());
+				for (String strTableName : mapTableColumn.keySet()) {
+					String strErrorTxt = "";
+					// 실제 모든 컬럼 정보이다.
+					String strCreateStatementColumn = "";
 					
-					String strCollectFieldType = collectField.getType();
-					String strCollectField = collectField.getField();
-					
-					if("ObjectID".equalsIgnoreCase(strCollectFieldType) || "String".equalsIgnoreCase(strCollectFieldType)) {
-						strColumn += strCollectField + " varchar(2000), "; 
-					} else if("Date".equalsIgnoreCase(strCollectFieldType)) {
-						strColumn += strCollectField + " Timestamp, ";
-					} else if("Integer".equalsIgnoreCase(strCollectFieldType) || "Double".equalsIgnoreCase(strCollectFieldType)) {
-						strColumn += strCollectField + " BIGINT, ";
-					} else if("Boolean".equalsIgnoreCase(strCollectFieldType)) {
-						strColumn += strCollectField + " int(1), ";
-					} else { //BasicDBObject
-						strErrorTxt += "igonr column is " + strCollectField + ", column type is " + strCollectFieldType + PublicTadpoleDefine.LINE_SEPARATOR;;
+					Map<String, CollectionFieldDAO> tmpTableColumn = mapTableColumn.get(strTableName);
+					for (String strColumn : tmpTableColumn.keySet()) {
+						
+						CollectionFieldDAO collectField = tmpTableColumn.get(strColumn);
+		//				System.out.println("====>" + collectField.getField() + "\t" + collectField.getType());
+						
+						String strCollectFieldType = collectField.getType();
+						String strCollectField = collectField.getField();
+						
+						if("ObjectID".equalsIgnoreCase(strCollectFieldType) || "String".equalsIgnoreCase(strCollectFieldType)) {
+							strCreateStatementColumn += strCollectField + " varchar(400), "; 
+						} else if("Date".equalsIgnoreCase(strCollectFieldType)) {
+							strCreateStatementColumn += strCollectField + " Timestamp, ";
+						} else if("Integer".equalsIgnoreCase(strCollectFieldType) || "Double".equalsIgnoreCase(strCollectFieldType)) {
+							strCreateStatementColumn += strCollectField + " BIGINT, ";
+						} else if("Boolean".equalsIgnoreCase(strCollectFieldType)) {
+							strCreateStatementColumn += strCollectField + " int(1), ";
+						} else if("BasicBSONList".equalsIgnoreCase(strCollectFieldType)) {
+							strCreateStatementColumn += strCollectField + " varchar(400), ";
+	//					} else { //BasicDBObject
+	//						strErrorTxt += "igonr column is " + strCollectField + ", column type is " + strCollectFieldType + PublicTadpoleDefine.LINE_SEPARATOR;;
+						}
 					}
 					
+					logger.debug("==========> table create ended..." + strTargetDir);
+					strCreateStatementColumn = StringUtils.removeEnd(strCreateStatementColumn, ", ");
+					
+					String createStatement = String.format(CREATE_STATEMNT, strTableName, strCreateStatementColumn);
+					logger.debug(createStatement);
+					new File(strTargetDir + strTableName + ".sql").createNewFile();
+					FileUtils.writeStringToFile(new File(strTargetDir + strTableName + ".sql"), createStatement, true);
+					FileUtils.writeStringToFile(new File(strTargetDir + strTableName + ".sql"), "/*" + strErrorTxt + "*/" + PublicTadpoleDefine.LINE_SEPARATOR, true);
 				}
-				logger.debug("==========> table create ended...");
-				strColumn = StringUtils.removeEnd(strColumn, ", ");
-				
-				String createStatement = String.format(CREATE_STATEMNT, strNewColName, strColumn);
-				logger.debug(createStatement);
-				new File(strFileName).createNewFile();
-				FileUtils.writeStringToFile(new File(strFileName), createStatement, true);
-				FileUtils.writeStringToFile(new File(strFileName), "/*" + strErrorTxt + "*/" + PublicTadpoleDefine.LINE_SEPARATOR, true);
 			}
 			
 			if(isInsertStatment) {
 				//insert 문을 생성합니다.
 				MongoDBQueryUtil qu2 = new MongoDBQueryUtil(getSourceUserDB(), workTable);
-				int i =0;
+				StringBuffer sbBufferColumn = new StringBuffer();
+				StringBuffer sbBufferValue = new StringBuffer();
+
 				while(qu2.hasNext()) {
 					qu2.nextQuery();
 					
 					// row 단위
 					List<DBObject> listDBObject = qu2.getCollectionDataList();
 					for (DBObject dbObject : listDBObject) {
-						List<CollectionFieldDAO> listCollectionInfo = MongoDBTableColumn.tableColumnInfoFlat(dbObject);
-						StringBuffer sbBufferColumn = new StringBuffer();
-						StringBuffer sbBufferValue = new StringBuffer();
-	
-//						logger.debug("\tinsert count is " + i++);
+						Map<String, List<CollectionFieldDAO>> mapCollectionInfo = MongoDBTableColumn.tableColumnInfoFlat(strNewColName, dbObject);
 						
+						for (String strKey : mapCollectionInfo.keySet()) {
+							logger.debug("=[start]\t" + strKey);
+							boolean isBasicBSONList = false;
 						
-						for (CollectionFieldDAO collectionFieldDAO : listCollectionInfo) {
-							
-							String strCollectFieldType = collectionFieldDAO.getType();
-							Object strValue = dbObject.get(collectionFieldDAO.getSearchName());
-	//						logger.debug("column name is [" + collectionFieldDAO.getField() + "] value is [" + collectionFieldDAO.getType() + "] values is [" + strValue + "]");
-							
-							if("ObjectID".equalsIgnoreCase(strCollectFieldType) || "String".equalsIgnoreCase(strCollectFieldType)) {
-								sbBufferColumn.append(collectionFieldDAO.getField()).append(", ");
+							sbBufferColumn.setLength(0);
+							sbBufferValue.setLength(0);
+		
+							List<CollectionFieldDAO> listCollectionInfo = mapCollectionInfo.get(strKey);
+							for (CollectionFieldDAO collectionFieldDAO : listCollectionInfo) {
 								
-								if(strValue != null) {
-									String strTmpValue = strValue.toString();
-	//								http://www.mysqlkorea.com/sub.html?mcode=manual&scode=01&m_no=21571&cat1=9&cat2=290&cat3=295&lang=k
+								String strCollectFieldType = collectionFieldDAO.getType();
+								Object strValue = dbObject.get(collectionFieldDAO.getSearchName());
+								logger.debug("column name is [" + collectionFieldDAO.getField() + "] type is [" + collectionFieldDAO.getType() + "] values is [" + strValue + "]");
+								
+								if("ObjectID".equalsIgnoreCase(strCollectFieldType) || "String".equalsIgnoreCase(strCollectFieldType)) {
+									sbBufferColumn.append(collectionFieldDAO.getField()).append(", ");
 									
-									strTmpValue = StringEscapeUtils.escapeSql(strTmpValue);
-									strTmpValue = StringHelper.escapeSQL(strTmpValue);
+									if(strValue != null) {
+										String strTmpValue = strValue == null?"":strValue.toString();
+
+										//	http://www.mysqlkorea.com/sub.html?mcode=manual&scode=01&m_no=21571&cat1=9&cat2=290&cat3=295&lang=k
+										strTmpValue = StringEscapeUtils.escapeSql(strTmpValue);
+										strTmpValue = StringHelper.escapeSQL(strTmpValue);
+										
+										sbBufferValue.append("'" + strTmpValue + "'").append(", ");
+									} else {
+										sbBufferValue.append("''").append(", ");
+									}
 									
-									sbBufferValue.append("'" + strTmpValue + "'").append(", ");
-								} else {
-									sbBufferValue.append("''").append(", ");
-								}
-								
-							} else if("Date".equalsIgnoreCase(strCollectFieldType)) {
-								sbBufferColumn.append(collectionFieldDAO.getField()).append(", ");
-	
-								if(strValue != null) {
-									java.util.Date date = (java.util.Date)strValue;
-									String strDate = Utils.dateToStr(date);
-									sbBufferValue.append("STR_TO_DATE('" + strDate + "', '%Y-%m-%d %H:%i:%s')").append(", ");
-								} else {
-									sbBufferValue.append("").append(", ");
-								}
-								
-								
-							} else if("Integer".equalsIgnoreCase(strCollectFieldType) || "Double".equalsIgnoreCase(strCollectFieldType)) {
-								
-								sbBufferColumn.append(collectionFieldDAO.getField()).append(", ");
-								
-								if(strValue != null) {
-									sbBufferValue.append(dbObject.get(collectionFieldDAO.getField())).append(", ");
-								} else {
-									sbBufferValue.append(0).append(", ");
-								}
-								
-							} else if("Boolean".equalsIgnoreCase(strCollectFieldType)) {
-								sbBufferColumn.append(collectionFieldDAO.getField()).append(", ");
-								
-								if(strValue != null) {
-									if(Boolean.parseBoolean(strValue.toString())) {
-										sbBufferValue.append("1").append(", ");
+								} else if("Date".equalsIgnoreCase(strCollectFieldType)) {
+									sbBufferColumn.append(collectionFieldDAO.getField()).append(", ");
+		
+									if(strValue != null) {
+										java.util.Date date = (java.util.Date)strValue;
+										String strDate = Utils.dateToStr(date);
+										sbBufferValue.append("STR_TO_DATE('" + strDate + "', '%Y-%m-%d %H:%i:%s')").append(", ");
+									} else {
+										sbBufferValue.append("").append(", ");
+									}
+									
+									
+								} else if("Integer".equalsIgnoreCase(strCollectFieldType) || "Double".equalsIgnoreCase(strCollectFieldType)) {
+									
+									sbBufferColumn.append(collectionFieldDAO.getField()).append(", ");
+									
+									if(strValue != null) {
+										sbBufferValue.append(dbObject.get(collectionFieldDAO.getField())).append(", ");
+									} else {
+										sbBufferValue.append(0).append(", ");
+									}
+									
+								} else if("Boolean".equalsIgnoreCase(strCollectFieldType)) {
+									sbBufferColumn.append(collectionFieldDAO.getField()).append(", ");
+									
+									if(strValue != null) {
+										if(Boolean.parseBoolean(strValue.toString())) {
+											sbBufferValue.append("1").append(", ");
+										} else {
+											sbBufferValue.append("0").append(", ");
+										}
 									} else {
 										sbBufferValue.append("0").append(", ");
 									}
-								} else {
-									sbBufferValue.append("0").append(", ");
+								} else if("BasicBSONList".equals(strCollectFieldType)) {
+									logger.debug("========> basicBsonlist \t" + collectionFieldDAO.getSearchName() + ":" + collectionFieldDAO.getField());
+
+									/*
+									 * list 형태의 데이터의 list데이터 하나가 하나의 insert문이 되도록 작업 되었습니다.
+									 * 하여서 데이터를 돌면서 insert into문을 생성해 주면됩니다.
+									 */
+									isBasicBSONList = true;
+									BasicBSONList basicList = (BasicBSONList)dbObject.get(strKey);
+									if(!basicList.isEmpty()) {
+										sbBufferColumn.setLength(0);
+										sbBufferValue.setLength(0);
+										
+										// insert into (a, b, c) 문의 컬럼명을 넣는 부분을 만듭니다. 
+										for (CollectionFieldDAO innerCollectionField : listCollectionInfo) {
+											sbBufferColumn.append(innerCollectionField.getField()).append(", ");
+										}
+										String strCName = StringUtils.removeEnd(sbBufferColumn.toString(), ", ");
+										
+										
+										for (Object objArryValue : basicList) {
+											sbBufferValue.setLength(0);
+											
+											if(objArryValue instanceof String) {
+												sbBufferValue.append(objArryValue == null?"''":"'" + objArryValue.toString() + "', ");
+												// _id 키값을 입력합니다.
+												sbBufferValue.append("'" + dbObject.get("_id").toString() + "', ");
+														
+											} else {
+												BasicDBObject basicObject = (BasicDBObject)objArryValue;
+												
+												for (CollectionFieldDAO innerCollectionField : listCollectionInfo) {
+													String strInnerValue = (String)basicObject.get(innerCollectionField.getSearchName());
+													sbBufferValue.append(strInnerValue == null?"''":"'" + strInnerValue + "', ");
+												}
+												
+											}
+											
+											String strCValue = StringUtils.removeEnd(sbBufferValue.toString(), ", ");
+											String strInsertStatement = String.format(INSERT_INTO, strKey, strCName, strCValue);
+											FileUtils.writeStringToFile(new File(strTargetDir + strKey + ".sql"), strInsertStatement, true);
+										}
+										
+									}
+									
+									break;
+								} else {// if("BasicDBObject".equalsIgnoreCase(strCollectFieldType)) { 
+		//							strErrorTxt += "igonr column is " + strCollectField + ", column type is " + strCollectFieldType + PublicTadpoleDefine.LINE_SEPARATOR;;
 								}
-								
-								
-							} else {// if("BasicDBObject".equalsIgnoreCase(strCollectFieldType)) { 
-	//							strErrorTxt += "igonr column is " + strCollectField + ", column type is " + strCollectFieldType + PublicTadpoleDefine.LINE_SEPARATOR;;
 							}
 							
-							
-						}
-						
-						String strCName = StringUtils.removeEnd(sbBufferColumn.toString(), ", ");
-						String strCValue = StringUtils.removeEnd(sbBufferValue.toString(), ", ");
-						String strInsertStatement = String.format(INSERT_INTO, strNewColName, strCName, strCValue);
-	//					logger.debug(strInsertStatement);
-						FileUtils.writeStringToFile(new File(strFileName), strInsertStatement, true);
-					}
+							if(!isBasicBSONList) {
+								String strCName = StringUtils.removeEnd(sbBufferColumn.toString(), ", ");
+								String strCValue = StringUtils.removeEnd(sbBufferValue.toString(), ", ");
+								String strInsertStatement = String.format(INSERT_INTO, strKey, strCName, strCValue);
+								FileUtils.writeStringToFile(new File(strTargetDir + strKey + ".sql"), strInsertStatement, true);
+							}
+						}	// end first statement
+					}	// end last statement
 					
 					long longEnd = System.currentTimeMillis();
 					logger.info(strNewColName + "=> " + ((longEnd - longStart)/1000) + " second");
