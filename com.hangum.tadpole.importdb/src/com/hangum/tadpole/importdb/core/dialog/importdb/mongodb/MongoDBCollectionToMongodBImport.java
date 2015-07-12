@@ -183,7 +183,11 @@ public class MongoDBCollectionToMongodBImport extends DBImport {
 	 * @param userDBDAO
 	 * @throws Exception
 	 */
-	public static final String CREATE_STATEMNT = "CREATE TABLE %s(%s); " + PublicTadpoleDefine.LINE_SEPARATOR;
+	public static final String CREATE_STATEMNT = "CREATE TABLE %s(%s)\n COLLATE='utf8mb4_unicode_ci'\n ENGINE=InnoDB; " + PublicTadpoleDefine.LINE_SEPARATOR;
+	/**
+	 * tool 에서 인서트 할때는 툴의 캐릭터 셋을 수정해 주어야 한다.
+	 * set names utf8mb4;
+	 */
 	public static final String INSERT_INTO = "INSERT INTO %s (%s) VALUES (%s);" + PublicTadpoleDefine.LINE_SEPARATOR;
 			
 	private void insertMongoDB(String strTargetDir, ModTableDAO modTableDAO, String strNewColName) throws Exception {
