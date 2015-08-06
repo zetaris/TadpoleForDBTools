@@ -299,7 +299,29 @@ public class MongoDBCollectionToMongodBImport extends DBImport {
 							for (CollectionFieldDAO collectionFieldDAO : listCollectionInfo) {
 								
 								String strCollectFieldType = collectionFieldDAO.getType();
-								Object strValue = dbObject.get(collectionFieldDAO.getSearchName());
+								
+								String strFieldName = collectionFieldDAO.getSearchName();
+								Object strValue = "";
+								if(StringUtils.indexOf(strFieldName, ".") > 0) {
+									
+									DBObject tmpDBObject = dbObject;
+									String[] arryCollectFields = StringUtils.split(strFieldName, ".");
+									for (String strTempField : arryCollectFields) {
+										Object obj = tmpDBObject.get(strTempField);
+										if(obj instanceof BasicDBObject) {
+											tmpDBObject = (BasicDBObject) obj;
+										} else {
+											strValue = obj;
+										}
+									}
+									
+//									strValue = tmpDBObject;//dbObject.get(strFieldName);
+//									logger.debug("\t\t sub document is : " + strValue);
+								} else {
+									strValue = dbObject.get(strFieldName);
+								}
+								
+//								Object strValue = dbObject.get(strFieldName);
 								logger.debug("column name is [" + collectionFieldDAO.getField() + "] type is [" + collectionFieldDAO.getType() + "] values is [" + strValue + "]");
 								
 								if("ObjectID".equalsIgnoreCase(strCollectFieldType) || "String".equalsIgnoreCase(strCollectFieldType)) {
@@ -352,7 +374,7 @@ public class MongoDBCollectionToMongodBImport extends DBImport {
 										sbBufferValue.append("0").append(", ");
 									}
 								} else if("BasicBSONList".equals(strCollectFieldType)) {
-									logger.debug("========> basicBsonlist \t" + collectionFieldDAO.getSearchName() + ":" + collectionFieldDAO.getField());
+									logger.debug("========> basicBsonlist \t" + strFieldName + ":" + collectionFieldDAO.getField());
 									
 									String strRealKey = StringUtils.remove(strKey, strNewColName+"_");
 
