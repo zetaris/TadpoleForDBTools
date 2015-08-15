@@ -212,7 +212,7 @@ public class MongoDBTableColumn {
 					columnArry.setSearchName("_id");
 					listListCollection.add(columnArry);
 					
-					returnColumns.put(strCollectionName + "_" + strName, listListCollection);
+					returnColumns.put(strCollectionName + "." + strName, listListCollection);
 				} else {
 					listCollection.add(column);
 				}
@@ -239,7 +239,7 @@ public class MongoDBTableColumn {
 															dbObject.get(name) != null ? dbObject.get(name).getClass().getSimpleName():"Unknow",  //$NON-NLS-1$
 															"NO");			 	//$NON-NLS-1$
 			
-			columnSub.setSearchName(column.getField() + "." + name);
+			columnSub.setSearchName(column.getSearchName() + "." + name);
 			
 			if( dbObject.get(name) instanceof BasicDBObject ) {
 				makeTableColumnFlat(retColumns, strCollectionName, listChildField, columnSub, (BasicDBObject)dbObject.get(name));

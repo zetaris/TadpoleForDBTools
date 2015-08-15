@@ -266,11 +266,11 @@ public class MongoDBCollectionToMongodBImport extends DBImport {
 					logger.debug("==========> table create ended..." + strTargetDir);
 					strCreateStatementColumn = StringUtils.removeEnd(strCreateStatementColumn, ", ");
 					
-					String createStatement = String.format(CREATE_STATEMNT, strTableName, strCreateStatementColumn);
+					String createStatement = String.format(CREATE_STATEMNT, StringUtils.replace(strTableName, ".", "_"), strCreateStatementColumn);
 					logger.debug(createStatement);
-					new File(strTargetDir + strTableName + ".sql").createNewFile();
-					FileUtils.writeStringToFile(new File(strTargetDir + strTableName + ".sql"), createStatement, true);
-					FileUtils.writeStringToFile(new File(strTargetDir + strTableName + ".sql"), "/*" + strErrorTxt + "*/" + PublicTadpoleDefine.LINE_SEPARATOR, true);
+					new File(strTargetDir + StringUtils.replace(strTableName, ".", "_") + ".sql").createNewFile();
+					FileUtils.writeStringToFile(new File(strTargetDir + StringUtils.replace(strTableName, ".", "_") + ".sql"), createStatement, true);
+					FileUtils.writeStringToFile(new File(strTargetDir + StringUtils.replace(strTableName, ".", "_") + ".sql"), "/*" + strErrorTxt + "*/" + PublicTadpoleDefine.LINE_SEPARATOR, true);
 				}
 			}
 			
@@ -303,7 +303,7 @@ public class MongoDBCollectionToMongodBImport extends DBImport {
 								String strFieldName = collectionFieldDAO.getSearchName();
 								Object strValue = "";
 								if(StringUtils.indexOf(strFieldName, ".") > 0) {
-									
+									logger.debug("\t field name is : " + strFieldName);
 									DBObject tmpDBObject = dbObject;
 									String[] arryCollectFields = StringUtils.split(strFieldName, ".");
 									for (String strTempField : arryCollectFields) {
@@ -356,7 +356,7 @@ public class MongoDBCollectionToMongodBImport extends DBImport {
 									sbBufferColumn.append(collectionFieldDAO.getField()).append(", ");
 									
 									if(strValue != null) {
-										sbBufferValue.append(dbObject.get(collectionFieldDAO.getField())).append(", ");
+										sbBufferValue.append(strValue).append(", ");
 									} else {
 										sbBufferValue.append(0).append(", ");
 									}
@@ -376,7 +376,7 @@ public class MongoDBCollectionToMongodBImport extends DBImport {
 								} else if("BasicBSONList".equals(strCollectFieldType)) {
 									logger.debug("========> basicBsonlist \t" + strFieldName + ":" + collectionFieldDAO.getField());
 									
-									String strRealKey = StringUtils.remove(strKey, strNewColName+"_");
+									String strRealKey = StringUtils.remove(strKey, strNewColName+".");
 
 									/*
 									 * list 형태의 데이터의 list데이터 하나가 하나의 insert문이 되도록 작업 되었습니다.
@@ -384,6 +384,11 @@ public class MongoDBCollectionToMongodBImport extends DBImport {
 									 */
 									isBasicBSONList = true;
 									BasicBSONList basicList = (BasicBSONList)dbObject.get(strRealKey);
+									if(basicList == null) {
+										logger.debug("\t\t basiclist is null " );
+										break;
+									}
+									
 									if(!basicList.isEmpty()) {
 										sbBufferColumn.setLength(0);
 										sbBufferValue.setLength(0);
@@ -417,8 +422,8 @@ public class MongoDBCollectionToMongodBImport extends DBImport {
 											}
 											
 											String strCValue = StringUtils.removeEnd(sbBufferValue.toString(), ", ");
-											String strInsertStatement = String.format(INSERT_INTO, strKey, strCName, strCValue);
-											FileUtils.writeStringToFile(new File(strTargetDir + strKey + ".sql"), strInsertStatement, true);
+											String strInsertStatement = String.format(INSERT_INTO, StringUtils.replace(strKey, ".", "_"), strCName, strCValue);
+											FileUtils.writeStringToFile(new File(strTargetDir + StringUtils.replace(strKey, ".", "_") + ".sql"), strInsertStatement, true);
 										}
 										
 									}
@@ -432,8 +437,8 @@ public class MongoDBCollectionToMongodBImport extends DBImport {
 							if(!isBasicBSONList) {
 								String strCName = StringUtils.removeEnd(sbBufferColumn.toString(), ", ");
 								String strCValue = StringUtils.removeEnd(sbBufferValue.toString(), ", ");
-								String strInsertStatement = String.format(INSERT_INTO, strKey, strCName, strCValue);
-								FileUtils.writeStringToFile(new File(strTargetDir + strKey + ".sql"), strInsertStatement, true);
+								String strInsertStatement = String.format(INSERT_INTO, StringUtils.replace(strKey, ".", "_"), strCName, strCValue);
+								FileUtils.writeStringToFile(new File(strTargetDir + StringUtils.replace(strKey, ".", "_") + ".sql"), strInsertStatement, true);
 							}
 						}	// end first statement
 					}	// end last statement

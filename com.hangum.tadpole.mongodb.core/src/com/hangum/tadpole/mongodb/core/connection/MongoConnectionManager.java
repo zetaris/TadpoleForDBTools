@@ -21,7 +21,6 @@ import org.apache.log4j.Logger;
 
 import com.hangum.tadpole.cipher.core.manager.CipherManager;
 import com.hangum.tadpole.engine.query.dao.system.UserDBDAO;
-import com.hangum.tadpole.mongodb.core.Messages;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoOptions;
@@ -117,9 +116,9 @@ public class MongoConnectionManager {
 //						System.out.println("=========> [" + dbName + "]");
 						if(userDB.getDb().equals(dbName)) isDB = true;						
 					}
-					if(!isDB) {
-						throw new MongoDBNotFoundException(userDB.getDb() + Messages.MongoDBConnection_0);
-					}
+//					if(!isDB) {
+//						throw new MongoDBNotFoundException(userDB.getDb() + Messages.MongoDBConnection_0);
+//					}
 					try {
 						//디비가 정상 생성 되어 있는지 권한이 올바른지 검사하기 위해 날려봅니다.
 						Set<String> setCollectName = db.getCollectionNames();
