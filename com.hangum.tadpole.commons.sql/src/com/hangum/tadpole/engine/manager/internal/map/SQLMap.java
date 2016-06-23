@@ -37,6 +37,7 @@ public class SQLMap {
 
 	private SQLMap() {}
 	public static SqlMapClient getInstance(UserDBDAO dbInfo) throws Exception {
+		System.out.println("==create dbinformation:=" + dbInfo.toString());
 		String config = getConfig(dbInfo);
 		
 		return SqlMapClientBuilder.buildSqlMapClient(new StringReader(config));
