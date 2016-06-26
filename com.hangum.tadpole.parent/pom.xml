@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<packaging>pom</packaging>
+	<groupId>com.hangum.tadpole</groupId>
+	<artifactId>com.hangum.tadpole.parent</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+
+	<properties>
+		<tycho-version>0.22.0</tycho-version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<eclipse>http://download.eclipse.org/releases/mars</eclipse>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>mars</id>
+			<layout>p2</layout>
+			<url>${eclipse}</url>
+		</repository>
+	</repositories>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-maven-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<extensions>true</extensions>
+				<configuration>
+					<dependency-resolution>
+						<optionalDependencies>ignore</optionalDependencies>
+					</dependency-resolution>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<target>
+						<artifact>
+							<groupId>com.hangum.tadpole</groupId>
+							<artifactId>targetProject</artifactId>
+							<version>1.0.0-SNAPSHOT</version>
+						</artifact>
+					</target>
+					<environments>
+						<environment>
+							<os>linux</os>
+							<ws>gtk</ws>
+							<arch>x86</arch>
+						</environment>
+						<environment>
+							<os>linux</os>
+							<ws>gtk</ws>
+							<arch>x86_64</arch>
+						</environment>
+						<environment>
+							<os>win32</os>
+							<ws>win32</ws>
+							<arch>x86</arch>
+						</environment>
+						<environment>
+							<os>win32</os>
+							<ws>win32</ws>
+							<arch>x86_64</arch>
+						</environment> -->
+						<environment>
+							<os>macosx</os>
+							<ws>cocoa</ws>
+							<arch>x86_64</arch>
+						</environment>
+					</environments>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<modules>
+		<module>../targetProject</module>
+		<module>../com.hangum.tadpole.ace.editor.core</module>
+		<module>../com.hangum.tadpole.commons.libs</module>
+		<module>../com.hangum.tadpole.application</module>
+		<module>../com.hangum.tadpole.applicaion.start</module>
+		<module>../com.hangum.tadpole.commons.admin.core</module>
+		<module>../com.hangum.tadpole.commons</module>
+		<module>../com.hangum.tadpole.commons.utils.zip</module>
+		<module>../com.hangum.tadpole.commons.sql</module>
+		<module>../com.hamgum.tadpole.help.core</module>
+		<module>../com.hangum.tadpole.hive.core</module>
+		<module>../com.hangum.tadpole.importdb</module>
+		<module>../com.hangum.tadpole.manager.core</module>
+		<module>../com.hangum.tadpole.mongodb.core</module>
+		<module>../com.hangum.tadpole.mongodb.erd.core</module>
+		<module>../com.hangum.tadpole.mongodb.model</module>
+		<module>../com.hangum.tadpole.monitoring.core</module>
+		<module>../com.hangum.tadpole.preference</module>
+		<module>../com.hangum.tadpole.rdb.core</module>
+		<module>../com.hangum.tadpole.rdb.erd.core</module>
+		<module>../com.hangum.tadpole.rdb.model</module>
+		<module>../com.hangum.tadpole.sendgrid.core</module>
+		<module>../com.hangum.tadpole.sql.parser</module>
+		<module>../com.hangum.tadpole.tajo.core</module>
+
+		<module>
+			../../tadpoledbhub-ext/com.hangum.tadpole.cipher.core
+		</module>
+		<module>
+			../../tadpoledbhub-ext/com.hangum.tadpole.compare.core
+		</module>
+		<module>
+			../../tadpoledbhub-ext/com.hangum.tadpole.mongodb.core.ext
+		</module>
+		<module>
+			../../tadpoledbhub-ext/com.hangum.tadpole.rdb.core.ext
+		</module>
+		<module>../com.hangum.tadpole.feature</module>
+
+		<module>../com.hangum.tadpole.product</module>
+	</modules>
+</project>
