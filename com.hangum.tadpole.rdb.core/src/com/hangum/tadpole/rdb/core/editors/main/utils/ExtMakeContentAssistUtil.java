@@ -29,6 +29,7 @@ import com.hangum.tadpole.engine.query.dao.mysql.TableColumnDAO;
 import com.hangum.tadpole.engine.query.dao.mysql.TableDAO;
 import com.hangum.tadpole.engine.query.dao.system.UserDBDAO;
 import com.hangum.tadpole.engine.sql.util.SQLUtil;
+import com.hangum.tadpole.hive.core.connections.HiveConnectionManager;
 import com.hangum.tadpole.rdb.core.viewers.object.sub.utils.TadpoleObjectQuery;
 import com.hangum.tadpole.tajo.core.connections.TajoConnectionManager;
 import com.ibatis.sqlmap.client.SqlMapClient;
@@ -210,6 +211,9 @@ public class ExtMakeContentAssistUtil extends MakeContentAssistUtil {
 				
 		if(DBGroupDefine.TAJO_GROUP == userDB.getDBGroup()) {
 			TajoConnectionManager manager = new TajoConnectionManager();
+			showTables = manager.tableList(userDB);			
+		} else if(DBGroupDefine.HIVE_GROUP == userDB.getDBGroup()) {
+			HiveConnectionManager manager = new HiveConnectionManager();
 			showTables = manager.tableList(userDB);			
 		} else {
 			SqlMapClient sqlClient = TadpoleSQLManager.getInstance(userDB);

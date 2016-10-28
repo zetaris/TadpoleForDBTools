@@ -34,6 +34,7 @@ import com.hangum.tadpole.engine.query.dao.system.UserDBDAO;
 import com.hangum.tadpole.engine.security.DBAccessCtlManager;
 import com.hangum.tadpole.engine.sql.util.ExecuteDDLCommand;
 import com.hangum.tadpole.engine.sql.util.SQLUtil;
+import com.hangum.tadpole.hive.core.connections.HiveConnectionManager;
 import com.hangum.tadpole.tajo.core.connections.TajoConnectionManager;
 import com.ibatis.sqlmap.client.SqlMapClient;
 
@@ -170,13 +171,15 @@ public class TadpoleObjectQuery {
 			if(TadpoleSQLManager.getDbMetadata(userDB) == null) {
 				TadpoleSQLManager.initializeConnection(TadpoleSQLManager.getKey(userDB), userDB, TajoConnectionManager.getInstance(userDB).getMetaData());
 			}
-		} 
-		
-		SqlMapClient sqlClient = TadpoleSQLManager.getInstance(userDB);
-		if(userDB.getDBGroup() == DBGroupDefine.ORACLE_GROUP) {
-			showTables = sqlClient.queryForList("tableList", StringUtils.upperCase(userDB.getUsers())); //$NON-NLS-1$
+		} else if(DBGroupDefine.HIVE_GROUP == userDB.getDBGroup()) {
+			showTables = new HiveConnectionManager().tableList(userDB);
 		} else {
-			showTables = sqlClient.queryForList("tableList", userDB.getDefaultSchemanName()); //$NON-NLS-1$
+			SqlMapClient sqlClient = TadpoleSQLManager.getInstance(userDB);
+			if(userDB.getDBGroup() == DBGroupDefine.ORACLE_GROUP) {
+				showTables = sqlClient.queryForList("tableList", StringUtils.upperCase(userDB.getUsers())); //$NON-NLS-1$
+			} else {
+				showTables = sqlClient.queryForList("tableList", userDB.getDefaultSchemanName()); //$NON-NLS-1$
+			}
 		}
 		
 		/** filter 정보가 있으면 처리합니다. */
@@ -266,6 +269,8 @@ public class TadpoleObjectQuery {
 		
 		if(DBGroupDefine.TAJO_GROUP == userDB.getDBGroup()) {
 			returnColumns = new TajoConnectionManager().tableColumnList(userDB, mapParam);			
+		} else if(DBGroupDefine.HIVE_GROUP == userDB.getDBGroup()) {
+			returnColumns = new HiveConnectionManager().tableColumnList(userDB, mapParam);			
 		} else if(DBGroupDefine.POSTGRE_GROUP == userDB.getDBGroup()) {
 			if("".equals(mapParam.get("schema")) || null == mapParam.get("schema")) {
 				mapParam.put("schema", "public");
@@ -353,8 +358,7 @@ public class TadpoleObjectQuery {
 				}
 			}
 		} else if(DBGroupDefine.HIVE_GROUP == userDB.getDBGroup()) {
-			SqlMapClient sqlClient = TadpoleSQLManager.getInstance(userDB);
-			List<TableDAO> tmpShowTables = sqlClient.queryForList("tableList", userDB.getDb()); //$NON-NLS-1$
+			List<TableDAO> tmpShowTables = new HiveConnectionManager().tableList(userDB);
 			
 			for(TableDAO dao : tmpShowTables) {
 				if(dao.getName().equals(tableDAO.getName())) {
@@ -362,6 +366,15 @@ public class TadpoleObjectQuery {
 					break;
 				}
 			}
+//			SqlMapClient sqlClient = TadpoleSQLManager.getInstance(userDB);
+//			List<TableDAO> tmpShowTables = sqlClient.queryForList("tableList", userDB.getDb()); //$NON-NLS-1$
+//			
+//			for(TableDAO dao : tmpShowTables) {
+//				if(dao.getName().equals(tableDAO.getName())) {
+//					showTables.add(dao);
+//					break;
+//				}
+//			}
 		} else if(DBGroupDefine.ALTIBASE_GROUP == userDB.getDBGroup()) {
 			Map<String, Object> mapParam = new HashMap<String, Object>();
 			

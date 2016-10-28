@@ -26,6 +26,7 @@ import com.hangum.tadpole.engine.query.dao.mysql.TableColumnDAO;
 import com.hangum.tadpole.engine.query.dao.mysql.TableDAO;
 import com.hangum.tadpole.engine.query.dao.system.UserDBDAO;
 import com.hangum.tadpole.engine.sql.util.SQLUtil;
+import com.hangum.tadpole.hive.core.connections.HiveConnectionManager;
 import com.hangum.tadpole.rdb.erd.core.relation.RelationUtil;
 import com.hangum.tadpole.rdb.model.Column;
 import com.hangum.tadpole.rdb.model.DB;
@@ -184,6 +185,8 @@ public enum TadpoleModelUtils {
 		
 		if(DBGroupDefine.TAJO_GROUP == userDB.getDBGroup()) {
 			listAllTables = new TajoConnectionManager().tableList(userDB);
+		} else if(DBGroupDefine.HIVE_GROUP == userDB.getDBGroup()) {
+			listAllTables = new HiveConnectionManager().tableList(userDB);
 		} else {
 			SqlMapClient sqlClient = TadpoleSQLManager.getInstance(userDB);
 			listAllTables = sqlClient.queryForList("tableList", StringUtils.isBlank(userDB.getSchema()) ? userDB.getDb() : userDB.getSchema()); //$NON-NLS-1$

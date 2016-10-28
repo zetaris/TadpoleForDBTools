@@ -23,6 +23,7 @@ import com.hangum.tadpole.engine.sql.util.PartQueryUtil;
 import com.hangum.tadpole.engine.sql.util.resultset.QueryExecuteResultDTO;
 import com.hangum.tadpole.engine.sql.util.resultset.ResultSetUtils;
 import com.hangum.tadpole.engine.sql.util.resultset.TadpoleResultSet;
+import com.hangum.tadpole.hive.core.connections.HiveConnectionManager;
 import com.hangum.tadpole.rdb.core.editors.main.utils.RequestQuery;
 import com.hangum.tadpole.rdb.core.editors.main.utils.plan.CubridExecutePlanUtils;
 import com.hangum.tadpole.rdb.core.editors.main.utils.plan.OracleExecutePlanUtils;
@@ -61,6 +62,9 @@ public class ExecuteQueryPlan {
 		try {
 			if(DBGroupDefine.TAJO_GROUP == userDB.getDBGroup()) {
 				TajoConnectionManager manager = new TajoConnectionManager();
+				rsDAO = manager.executeQueryPlan(userDB, reqQuery.getSql(), reqQuery.getSqlStatementType(), reqQuery.getStatementParameter());
+			} else if (DBGroupDefine.HIVE_GROUP == userDB.getDBGroup()) {
+				HiveConnectionManager manager = new HiveConnectionManager();
 				rsDAO = manager.executeQueryPlan(userDB, reqQuery.getSql(), reqQuery.getSqlStatementType(), reqQuery.getStatementParameter());
 			} else {
 				
