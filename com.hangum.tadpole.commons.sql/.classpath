@@ -16,5 +16,22 @@
 	<classpathentry kind="src" path="src_test"/>
 	<classpathentry exported="true" kind="lib" path="libs/dbutils/commons-dbutils-1.6.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
+	<classpathentry kind="lib" path="libs/driver/hive/commons-codec-1.4.jar"/>
+	<classpathentry kind="lib" path="libs/driver/hive/commons-collections-3.2.1.jar"/>
+	<classpathentry kind="lib" path="libs/driver/hive/commons-configuration-1.6.jar"/>
+	<classpathentry kind="lib" path="libs/driver/hive/commons-lang-2.6.jar"/>
+	<classpathentry kind="lib" path="libs/driver/hive/commons-logging-1.1.3.jar"/>
+	<classpathentry kind="lib" path="libs/driver/hive/guava-11.0.2.jar"/>
+	<classpathentry kind="lib" path="libs/driver/hive/hadoop-common-2.7.0.jar"/>
+	<classpathentry kind="lib" path="libs/driver/hive/hive-common-1.2.1000.2.4.2.12-1.jar"/>
+	<classpathentry kind="lib" path="libs/driver/hive/hive-jdbc-1.2.1000.2.4.2.12-1.jar"/>
+	<classpathentry kind="lib" path="libs/driver/hive/hive-metastore-1.2.1000.2.4.2.12-1.jar"/>
+	<classpathentry kind="lib" path="libs/driver/hive/hive-service-1.2.1000.2.4.2.12-1.jar"/>
+	<classpathentry kind="lib" path="libs/driver/hive/httpclient-4.3.6.jar"/>
+	<classpathentry kind="lib" path="libs/driver/hive/httpcore-4.3.3.jar"/>
+	<classpathentry kind="lib" path="libs/driver/hive/libthrift-0.9.0.jar"/>
+	<classpathentry kind="lib" path="libs/driver/hive/log4j-1.2.16.jar"/>
+	<classpathentry kind="lib" path="libs/driver/hive/slf4j-api-1.7.5.jar"/>
+	<classpathentry kind="lib" path="libs/driver/hive/slf4j-log4j12-1.7.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -200,6 +200,8 @@ public class TadpoleSQLManager extends AbstractTadpoleManager {
 		} else if(userDB.getDBGroup() == DBGroupDefine.POSTGRE_GROUP) {
 			String strFullKeywords = StringUtils.join(PostgreSQLConstant.QUOTE_POSTGRES_KEYWORDS, ",") + "," + metaData.getSQLKeywords();
 			tadpoleMetaData.setKeywords(strFullKeywords);
+		} else if (userDB.getDBGroup() == DBGroupDefine.HIVE_GROUP) {
+			tadpoleMetaData.setKeywords("");
 		} else {
 			tadpoleMetaData.setKeywords(metaData.getSQLKeywords());
 		}
