@@ -42,8 +42,8 @@ public class AbstractLoginDialog extends Dialog {
 	@Override
 	public void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		newShell.setText(String.format("%s", SystemDefine.NAME)); //$NON-NLS-1$
-		newShell.setImage(GlobalImageUtils.getTadpoleIcon());
+		newShell.setText(String.format("%s - Login", SystemDefine.NAME)); //$NON-NLS-1$
+		//newShell.setImage(GlobalImageUtils.getTadpoleIcon());
 	}
 	
 	/**

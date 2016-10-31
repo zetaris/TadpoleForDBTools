@@ -27,6 +27,7 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -69,8 +70,8 @@ import com.swtdesigner.SWTResourceManager;
 public class LoginDialog extends AbstractLoginDialog {
 	private static final Logger logger = Logger.getLogger(LoginDialog.class);
 	
-	private Label lblLoginForm;
-	private Label lblLabelLblhangum;
+	//private Label lblLoginForm;
+	//private Label lblLabelLblhangum;
 	private Composite compositeLogin;
 	private Label lblEmail;
 	
@@ -82,11 +83,11 @@ public class LoginDialog extends AbstractLoginDialog {
 	private Combo comboLanguage;
 	
 	private Button btnLogin;
-	private Button btnNewUser;
+	//private Button btnNewUser;
 	private Button btnFindPasswd;
 	
 	private Composite compositeHead;
-	private Composite compositeTail;
+	//private Composite compositeTail;
 	
 	public LoginDialog(Shell shell) {
 		super(shell);
@@ -110,20 +111,21 @@ public class LoginDialog extends AbstractLoginDialog {
 		compositeHead.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		compositeHead.setLayout(new GridLayout(1, false));
 		
-		lblLoginForm = new Label(compositeHead, SWT.NONE);
-		lblLoginForm.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		lblLoginForm.setFont(SWTResourceManager.getFont(".SF NS Text", 15, SWT.NONE));
-		lblLoginForm.setText(LoginDialogMessages.get().LoginDialog_WelcomeMsg);
-		
-		lblLabelLblhangum = new Label(compositeHead, SWT.NONE);
-		lblLabelLblhangum.setText(String.format(LoginDialogMessages.get().LoginDialog_ProjectRelease, SystemDefine.MAJOR_VERSION, SystemDefine.SUB_VERSION, SystemDefine.RELEASE_DATE));
+//		lblLoginForm = new Label(compositeHead, SWT.NONE);
+//		lblLoginForm.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+//		lblLoginForm.setFont(SWTResourceManager.getFont(".SF NS Text", 15, SWT.NONE));
+//		lblLoginForm.setText(LoginDialogMessages.get().LoginDialog_WelcomeMsg);
+//		
+//		lblLabelLblhangum = new Label(compositeHead, SWT.NONE);
+//		lblLabelLblhangum.setText(String.format(LoginDialogMessages.get().LoginDialog_ProjectRelease, SystemDefine.MAJOR_VERSION, SystemDefine.SUB_VERSION, SystemDefine.RELEASE_DATE));
 		
 		Composite compositeLeftBtn = new Composite(container, SWT.NONE);
 		compositeLeftBtn.setLayout(new GridLayout(1, false));
 		
-		Button button = new Button(compositeLeftBtn, SWT.NONE);
-		button.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		button.setImage(ResourceManager.getPluginImage("com.hangum.tadpole.login.core", "resources/TDB_64.png")); //$NON-NLS-1$
+		Label logoLabel = new Label(compositeLeftBtn, SWT.NONE);
+		//button.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		Image logo = ResourceManager.getPluginImage("com.hangum.tadpole.login.core", "resources/icon-lightning-64.png");
+		logoLabel.setImage(logo); //$NON-NLS-1$
 		
 		compositeLogin = new Composite(container, SWT.NONE);
 		compositeLogin.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
@@ -191,32 +193,32 @@ public class LoginDialog extends AbstractLoginDialog {
 			}
 		});
 		comboLanguage.add(Locale.ENGLISH.getDisplayLanguage(Locale.ENGLISH));
-		comboLanguage.add(Locale.KOREAN.getDisplayLanguage(Locale.KOREAN));
+		//comboLanguage.add(Locale.KOREAN.getDisplayLanguage(Locale.KOREAN));
 		comboLanguage.setData(Locale.ENGLISH.getDisplayLanguage(Locale.ENGLISH), Locale.ENGLISH);
-		comboLanguage.setData(Locale.KOREAN.getDisplayLanguage(Locale.KOREAN), Locale.KOREAN);
+		//comboLanguage.setData(Locale.KOREAN.getDisplayLanguage(Locale.KOREAN), Locale.KOREAN);
 		
-		compositeTail = new Composite(container, SWT.NONE);
-		GridLayout gl_compositeTail = new GridLayout(4, false);
-		gl_compositeTail.verticalSpacing = 0;
-		gl_compositeTail.horizontalSpacing = 0;
-		gl_compositeTail.marginHeight = 0;
-		gl_compositeTail.marginWidth = 0;
-		compositeTail.setLayout(gl_compositeTail);
-		compositeTail.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		
-		Label lblLicense = new Label(compositeTail, SWT.NONE);
-		lblLicense.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		lblLicense.setText("License is GNU Lesser General Public License v.3");
-		
-		Label lblDocument = new Label(compositeTail, SWT.NONE);
-		lblDocument.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblDocument.setText("<a href='" + LoginDialogMessages.get().LoginDialog_lblNewLabel_text_1 + "' target='_blank'>Document</a>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		lblDocument.setData(RWT.MARKUP_ENABLED, Boolean.TRUE);
-		
-		Label lblIssue = new Label(compositeTail, SWT.NONE);
-		lblIssue.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblIssue.setText("<a href='https://github.com/hangum/TadpoleForDBTools/issues' target='_blank'>Feedback</a>"); //$NON-NLS-1$ //$NON-NLS-2$
-		lblIssue.setData(RWT.MARKUP_ENABLED, Boolean.TRUE);
+//		compositeTail = new Composite(container, SWT.NONE);
+//		GridLayout gl_compositeTail = new GridLayout(4, false);
+//		gl_compositeTail.verticalSpacing = 0;
+//		gl_compositeTail.horizontalSpacing = 0;
+//		gl_compositeTail.marginHeight = 0;
+//		gl_compositeTail.marginWidth = 0;
+//		compositeTail.setLayout(gl_compositeTail);
+//		compositeTail.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+//		
+//		Label lblLicense = new Label(compositeTail, SWT.NONE);
+//		lblLicense.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+//		lblLicense.setText("License is GNU Lesser General Public License v.3");
+//		
+//		Label lblDocument = new Label(compositeTail, SWT.NONE);
+//		lblDocument.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+//		lblDocument.setText("<a href='" + LoginDialogMessages.get().LoginDialog_lblNewLabel_text_1 + "' target='_blank'>Document</a>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+//		lblDocument.setData(RWT.MARKUP_ENABLED, Boolean.TRUE);
+//		
+//		Label lblIssue = new Label(compositeTail, SWT.NONE);
+//		lblIssue.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+//		lblIssue.setText("<a href='https://github.com/hangum/TadpoleForDBTools/issues' target='_blank'>Feedback</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+//		lblIssue.setData(RWT.MARKUP_ENABLED, Boolean.TRUE);
 
 		AnalyticCaller.track("login"); //$NON-NLS-1$
 		
@@ -372,15 +374,15 @@ public class LoginDialog extends AbstractLoginDialog {
 	 */
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
-		btnNewUser = createButton(parent, ID_NEW_USER, LoginDialogMessages.get().LoginDialog_button_new_user, false);
-		try {
-			SMTPDTO smtpDto = GetAdminPreference.getSessionSMTPINFO();
-			if(smtpDto.isValid()) { //$NON-NLS-1$
-				btnFindPasswd = createButton(parent, ID_FINDPASSWORD, LoginDialogMessages.get().ResetPassword, false);
-			}
-		} catch (Exception e) {
-//			ignore exception
-		}
+//		btnNewUser = createButton(parent, ID_NEW_USER, LoginDialogMessages.get().LoginDialog_button_new_user, false);
+//		try {
+//			SMTPDTO smtpDto = GetAdminPreference.getSessionSMTPINFO();
+//			if(smtpDto.isValid()) { //$NON-NLS-1$
+//				btnFindPasswd = createButton(parent, ID_FINDPASSWORD, LoginDialogMessages.get().ResetPassword, false);
+//			}
+//		} catch (Exception e) {
+////			ignore exception
+//		}
 	}
 	
 	/**
@@ -442,8 +444,8 @@ public class LoginDialog extends AbstractLoginDialog {
 		Locale localeSelect = (Locale)comboLanguage.getData(strComoboStr);
 		RWT.getUISession().setLocale(localeSelect);
 		
-		lblLoginForm.setText(LoginDialogMessages.get().LoginDialog_WelcomeMsg);
-		lblLabelLblhangum.setText(String.format(LoginDialogMessages.get().LoginDialog_ProjectRelease, SystemDefine.MAJOR_VERSION, SystemDefine.SUB_VERSION, SystemDefine.RELEASE_DATE));
+//		lblLoginForm.setText(LoginDialogMessages.get().LoginDialog_WelcomeMsg);
+//		lblLabelLblhangum.setText(String.format(LoginDialogMessages.get().LoginDialog_ProjectRelease, SystemDefine.MAJOR_VERSION, SystemDefine.SUB_VERSION, SystemDefine.RELEASE_DATE));
 		btnLogin.setText(LoginDialogMessages.get().LoginDialog_15);
 		
 		btnCheckButton.setText(LoginDialogMessages.get().LoginDialog_9);
@@ -451,7 +453,7 @@ public class LoginDialog extends AbstractLoginDialog {
 		lblPassword.setText(LoginDialogMessages.get().LoginDialog_4);
 		lblLanguage.setText(LoginDialogMessages.get().LoginDialog_lblLanguage_text);
 		
-		if(btnNewUser != null) btnNewUser.setText(LoginDialogMessages.get().LoginDialog_button_new_user);
+//		if(btnNewUser != null) btnNewUser.setText(LoginDialogMessages.get().LoginDialog_button_new_user);
 		if(btnFindPasswd != null) {
 			btnFindPasswd.setText(LoginDialogMessages.get().ResetPassword);
 		}
@@ -478,6 +480,6 @@ public class LoginDialog extends AbstractLoginDialog {
 	 */
 	@Override
 	protected Point getInitialSize() {
-		return new Point(480, 270);
+		return new Point(480, 170);
 	}
 }

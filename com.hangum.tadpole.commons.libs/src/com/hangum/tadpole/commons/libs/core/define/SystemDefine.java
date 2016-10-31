@@ -20,13 +20,13 @@ import org.eclipse.core.runtime.Platform;
  */
 public class SystemDefine {
 	
-	public static final String NAME = "Tadpole DB Hub";
-	public static final String MAJOR_VERSION = "1.7.3";
-	public static final String SUB_VERSION = "Build (r0)";
-	public static final String RELEASE_DATE = "2016.10.12";
-	public static final String INFORMATION = "http://hangum.github.io/TadpoleForDBTools/";
+	public static final String NAME = "Lightning SQL";
+	public static final String MAJOR_VERSION = "2.0.0";
+	public static final String SUB_VERSION = "";
+	public static final String RELEASE_DATE = "";
+	public static final String INFORMATION = "";
 	
-	public static final String ADMIN_EMAIL = "hangum@tadpolehub.com";
+	public static final String ADMIN_EMAIL = "lightning@zetaris.com";
 	public static final String SOURCE_PAGE = INFORMATION;
 	
 	/**

@@ -7,11 +7,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.hive.jdbc.HiveConnection;
 import org.apache.log4j.Logger;
 
 import com.hangum.tadpole.commons.libs.core.define.PublicTadpoleDefine.SQL_STATEMENT_TYPE;
@@ -31,7 +29,6 @@ public class HiveConnectionManager implements ConnectionInterfact {
 	}
 	
 	private static final Logger logger = Logger.getLogger(HiveConnectionManager.class);
-	private static Map<String, String> tableDataSourceMap = new HashMap();
 
 	public static Connection getInstance(final UserDBDAO userDB) throws Exception {
 		//java.sql.Connection javaConn = new HiveConnection(userDB.getUrl(), new java.util.Properties());
@@ -116,13 +113,18 @@ public class HiveConnectionManager implements ConnectionInterfact {
 	    	while(rs.next()) {
 	    		String strTBName = rs.getString("TABLE");
 	    		Boolean temporary = rs.getBoolean("Is Temporary");
-	    		String dataSource = rs.getString("Data Source");
+	    		String comments = rs.getString("Data Source");
+	    		String dataSource = null;
+	    		int index = comments.indexOf("@");
 	    		
-	    		TableDAO tdao = new TableDAO(strTBName, "Data Source : " + dataSource);
+	    		if (index >= 0) {
+	    			dataSource = comments.substring(index + 1);
+	    		}
+	    		
+	    		TableDAO tdao = new TableDAO(strTBName, comments);
 	    		tdao.setTable_type(temporary? "Temporary" : "Non temporary");
+	    		tdao.setDataSource(dataSource);
 	    		showTables.add(tdao);
-	    		
-	    		tableDataSourceMap.put(strTBName, dataSource);
 	    	}
 	    	
 		} catch(Exception e) {
@@ -145,11 +147,12 @@ public class HiveConnectionManager implements ConnectionInterfact {
 		Statement st = null;
 		ResultSet rs = null;
 		
+		
 		try {
 			conn = getInstance(userDB);
 			st = conn.createStatement();
-			String dataSource = tableDataSourceMap.get(mapParam.get("table"));
-	    	rs = st.executeQuery("DESC " + (dataSource == null ? "" : dataSource) + "." + mapParam.get("table"));
+			String dataSource = mapParam.get("data_source");
+	    	rs = st.executeQuery("DESC " + (dataSource == null ? "" : (dataSource + ".")) + mapParam.get("table"));
 
 	    	while(rs.next()) {
 	    		TableColumnDAO tcDAO = new TableColumnDAO();

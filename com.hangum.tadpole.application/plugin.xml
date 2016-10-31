@@ -25,10 +25,10 @@
          point="org.eclipse.rap.ui.branding">
       <branding
             body="html/body.html"
-            favicon="icons/TadpoleDBHub.ico"
+            favicon="icons/icon-lightning-64.png"
             id="com.hangum.tadpole.browser.rap.branding"
             themeId="org.eclipse.rap.design.example.business.theme"
-            title="Tadpole DB Hub-v1.7.3(r1)">
+            title="Lightning SQL Client">
       </branding>
    </extension>
    <extension

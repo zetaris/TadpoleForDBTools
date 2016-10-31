@@ -270,6 +270,9 @@ public class TadpoleObjectQuery {
 		if(DBGroupDefine.TAJO_GROUP == userDB.getDBGroup()) {
 			returnColumns = new TajoConnectionManager().tableColumnList(userDB, mapParam);			
 		} else if(DBGroupDefine.HIVE_GROUP == userDB.getDBGroup()) {
+			if (tableDao.getDataSource() != null) {
+				mapParam.put("data_source", tableDao.getDataSource());
+			}
 			returnColumns = new HiveConnectionManager().tableColumnList(userDB, mapParam);			
 		} else if(DBGroupDefine.POSTGRE_GROUP == userDB.getDBGroup()) {
 			if("".equals(mapParam.get("schema")) || null == mapParam.get("schema")) {

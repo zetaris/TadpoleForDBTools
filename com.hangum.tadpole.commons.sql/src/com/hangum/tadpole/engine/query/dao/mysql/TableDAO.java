@@ -33,6 +33,7 @@ public class TableDAO extends StructObjectDAO {
 	
 	/** hive */
 	String tab_name = "";
+	String dataSource = "";
 
 	/** mongoDB */
 	long rows = 0l;
@@ -112,7 +113,14 @@ public class TableDAO extends StructObjectDAO {
 	public void setSize(long size) {
 		this.size = size;
 	}
-
+	
+	public void setDataSource(String dataSource) {
+		this.dataSource = dataSource;
+	}
+	
+	public String getDataSource() {
+		return this.dataSource;
+	}
 	
 	@Override
 	public boolean equals(Object obj) {
